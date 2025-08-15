@@ -28,36 +28,39 @@ jobs:
         id: version
         run: |
           # Get the latest tag
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          echo "Latest tag: $LATEST_TAG"
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          echo "Latest tag: ${LATEST_TAG:-'(none)'}"
           
-          # Remove 'v' prefix if present
-          LATEST_VERSION=${LATEST_TAG#v}
-          echo "Latest version: $LATEST_VERSION"
-          
-          # Check commit messages for version bump type
-          COMMITS=$(git log ${LATEST_TAG}..HEAD --oneline --pretty=format:"%s")
-          echo "Commits since last tag:"
-          echo "$COMMITS"
-          
-          # Default to patch version bump
-          VERSION_TYPE="patch"
-          
-          # Check for breaking changes or major version indicators
-          if echo "$COMMITS" | grep -i "BREAKING CHANGE\|major:" > /dev/null; then
-            VERSION_TYPE="major"
-          # Check for new features
-          elif echo "$COMMITS" | grep -i "feat\|feature\|minor:" > /dev/null; then
-            VERSION_TYPE="minor"
-          fi
-          
-          echo "Version bump type: $VERSION_TYPE"
-          echo "version_type=$VERSION_TYPE" >> $GITHUB_OUTPUT
-          
-          # Calculate new version using basic shell arithmetic
-          if [ "$LATEST_VERSION" = "0.0.0" ]; then
+          # Handle first release case
+          if [ -z "$LATEST_TAG" ]; then
+            echo "No existing tags found - this is the first release"
             NEW_VERSION="1.0.0"
+            COMMITS=$(git log --oneline --pretty=format:"%s")
+            echo "All commits in repository:"
           else
+            # Remove 'v' prefix if present
+            LATEST_VERSION=${LATEST_TAG#v}
+            echo "Latest version: $LATEST_VERSION"
+            
+            # Check commit messages for version bump type
+            COMMITS=$(git log ${LATEST_TAG}..HEAD --oneline --pretty=format:"%s")
+            echo "Commits since last tag:"
+            
+            # Default to patch version bump
+            VERSION_TYPE="patch"
+            
+            # Check for breaking changes or major version indicators
+            if echo "$COMMITS" | grep -i "BREAKING CHANGE\|major:" > /dev/null; then
+              VERSION_TYPE="major"
+            # Check for new features
+            elif echo "$COMMITS" | grep -i "feat\|feature\|minor:" > /dev/null; then
+              VERSION_TYPE="minor"
+            fi
+            
+            echo "Version bump type: $VERSION_TYPE"
+            echo "version_type=$VERSION_TYPE" >> $GITHUB_OUTPUT
+            
+            # Calculate new version using basic shell arithmetic
             IFS='.' read -r major minor patch <<< "$LATEST_VERSION"
             case $VERSION_TYPE in
               major)
@@ -71,6 +74,8 @@ jobs:
                 ;;
             esac
           fi
+          
+          echo "$COMMITS"
           
           echo "New version: $NEW_VERSION"
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
