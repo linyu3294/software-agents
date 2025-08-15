@@ -109,14 +109,14 @@ jobs:
           echo "${{ steps.version.outputs.new_version }}" > dist/VERSION
           
           # Create a manifest file
-          cat > dist/MANIFEST.txt << EOF
-Software Agents Documentation Library
-Version: ${{ steps.version.outputs.new_version }}
-Generated: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-Contents:
-$(find dist -type f -name "*.md" | sort)
-EOF
+          {
+            echo "Software Agents Documentation Library"
+            echo "Version: ${{ steps.version.outputs.new_version }}"
+            echo "Generated: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+            echo ""
+            echo "Contents:"
+            find dist -type f -name "*.md" | sort
+          } > dist/MANIFEST.txt
           
           # Create a tarball and zip file
           tar -czf software-agents-${{ steps.version.outputs.new_version }}.tar.gz -C dist .
