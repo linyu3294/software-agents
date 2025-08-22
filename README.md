@@ -11,6 +11,7 @@ This repository contains:
   - `design_agent.md` - UX/UI design processes and standards
   - `documentation_agent.md` - Documentation standards and processes
   - `engineering_agent.md` - Development guidelines and best practices
+  - `product_agent.md` - Product management and requirements definition
 
 - **Workflow Documentation**:
   - `workflow_and_collaboration.md` - Team collaboration workflows and artifact ownership matrix
@@ -75,6 +76,7 @@ This repository uses GitHub Actions to automatically:
 ```bash
 # Copy specific agent documentation
 cp software-agents/agents/architect_agent.md docs/architecture/
+cp software-agents/agents/product_agent.md docs/product/
 cp software-agents/workflow_and_collaboration.md docs/team-processes/
 ```
 
